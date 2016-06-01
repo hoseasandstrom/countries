@@ -12,55 +12,62 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class Main {
-    static final String SAVE_FILE = "country.json";
-    static Scanner scanner = new Scanner(System.in);
-    static Country country = new Country();
-
-    static HashMap<String, ArrayList<Country>> countryMap = new HashMap<>();
 
     public static void main(String[] args) throws Exception {
-        country = loadCountry(SAVE_FILE);
-        if (country == null) {
-            country = new Country();
-            System.out.println("This will start again");
-        } else {
-            System.out.println("Found saved file.");
-            System.out.println("Start this again? [y/n]");
-            String answer = scanner.nextLine();
-            if (answer.equalsIgnoreCase("y")) {
-                country = new Country();
+
+        System.out.println("Please choose a letter to see the countries associated with it.");
+        System.out.println("** Note: letter input needs to be Uppercase ** ");
+        Scanner scanner = new Scanner(System.in);
+        String chooseLetter = scanner.nextLine();
+        if (chooseLetter.length() > 1) {
+            throw new Exception("Invalid input");
+        }
+        HashMap<String, ArrayList<Country>> countryMap = readCountriesFromFile("countries.txt");
+        ArrayList countryArrayList = countryMap.get(chooseLetter);
+        System.out.println(countryArrayList);
+        loadCountry(chooseLetter, countryArrayList.toString());
+        saveCountry(countryArrayList, chooseLetter);
+    }
+
+    public static HashMap<String, ArrayList<Country>> readCountriesFromFile(String fileName) throws FileNotFoundException {
+        HashMap<String, ArrayList<Country>> countryMap= new HashMap<>();
+        File f = new File(fileName);
+        Scanner fileScanner = new Scanner(f);
+        while (fileScanner.hasNext()) {
+            String line = fileScanner.nextLine();
+            String[] columns = line.split("\\|");
+            Country country = new Country(columns[0], columns[1]);
+            String chooseLetter = String.valueOf(country.countryCode.charAt(0));
+            if (!countryMap.containsKey(chooseLetter)) {
+                countryMap.put(chooseLetter, new ArrayList<>());
             }
+            countryMap.get(chooseLetter).add(country);
         }
-        System.out.println("Look up a country:");
-    if (country.country == null) country.chooseLetter();
+        return countryMap;
     }
 
-    public static void saveCountry(Country country, String filename) {
+    public static void loadCountry(String chooseLetter, String countryId ) throws IOException {
+        File countryFile = new File(String.format("%s_Countries.txt", chooseLetter));
+
+        FileWriter fw = new FileWriter(countryFile);
+        fw.write(countryId);
+        fw.close();
+
+    }
+
+
+    public static void saveCountry(ArrayList countryArrayList, String chooseLetter) throws IOException {
+        File f = new File(String.format("%s_country.json", chooseLetter));
         JsonSerializer serializer = new JsonSerializer();
-        String json = serializer.include("*").serialize(country);
+        String json = serializer.serialize(countryArrayList);
+        FileWriter fw = new FileWriter(f);
+        fw.write(json);
+        fw.close();
+        }
 
-        File f = new File(filename);
-        try {
-            FileWriter fw = new FileWriter(f);
-            fw.write(json);
-            fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
-    public static Country loadCountry(String filename) throws FileNotFoundException {
-        File f = new File(filename);
-        try {
-            Scanner scanner = new Scanner(f);
-            scanner.useDelimiter("\\Z");
-            String contents = scanner.next();
-            JsonParser parser = new JsonParser();
-            return parser.parse(contents, Country.class);
-        } catch (FileNotFoundException e) {
-        }
-        return null;
-    }
-}
+
 
 
 

@@ -1,23 +1,20 @@
 package com.studenttheironyard;
 
-import static com.studenttheironyard.Main.countryMap;
 
 /**
  * Created by hoseasandstrom on 5/26/16.
  */
 public class Country {
-    String countries;
+    String countryCode;
     String country;
 
-    public void chooseLetter() throws Exception {
-        System.out.println("Please choose a letter to see the countries associated with it.");
-        if (countryMap.containsKey("letter")) {
-            System.out.println("Here is/are your result(s): " + countryMap.get(countries));
-        }
+    public Country(String countryCode, String country) {
+        this.countryCode = countryCode;
+        this.country = country;
     }
 
-    public String getCountries() {
-        return countries;
+    public String getCountryCode() {
+        return countryCode;
     }
 
     public String getCountry() {
@@ -26,10 +23,7 @@ public class Country {
 
     @Override
     public String toString() {
-        return "Country{" +
-                "countries='" + countries + '\'' +
-                ", country='" + country + '\'' +
-                '}';
+        return "*" + countryCode +  "-" + country;
     }
 }
 
